@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alarm Clock</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .hover-tilt {
+      transition: transform 0.4s ease-in-out;
+      will-change: transform;
+      transform-style: preserve-3d;
+    }
+
+    .hover-tilt:hover {
+      transform: scale(1.01) rotateX(2deg) rotateY(-2deg);
+    }
+
+    .tilt-on-hover {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .tilt-on-hover:hover {
+      transform: perspective(800px) rotateX(6deg) rotateY(-6deg) scale(1.02);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .animated-icon:hover {
+      animation: wiggle 0.6s infinite;
+    }
+
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(-3deg); }
+      50% { transform: rotate(3deg); }
+    }
+  </style>
+</head>
+<body class="hover-tilt font-sans bg-cover bg-center bg-no-repeat min-h-screen text-slate-900 transition-all duration-300 dark:bg-[#0f172a] dark:text-white" style="background-image: url('https://static.vecteezy.com/system/resources/previews/002/969/252/non_2x/abstract-colorful-background-free-vector.jpg');">
+
+  <!-- Navbar -->
+  <nav class="w-full bg-white/30 dark:bg-[#1e293b]/80 backdrop-blur-md py-4 px-6 flex justify-between items-center shadow-md">
+    <div class="font-[Orbitron] text-xl text-[#10b981] flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6 animated-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3" />
+      </svg>
+      AlarmMate
+    </div>
+    <ul class="flex space-x-6 text-gray-800 dark:text-white">
+      <li class="hover:text-[#10b981] cursor-pointer">Home</li>
+      <li class="hover:text-[#10b981] cursor-pointer">Customize</li>
+      <li class="hover:text-[#10b981] cursor-pointer">Sleep Tips</li>
+      <li class="hover:text-[#10b981] cursor-pointer">History</li>
+      <li class="hover:text-[#10b981] cursor-pointer" onclick="toggleTheme()">Toggle Theme</li>
+    </ul>
+  </nav>
+
+  <!-- Live Clock -->
+  <div class="text-center mt-6 text-4xl font-[Orbitron] text-[#10b981]" id="liveClock">00:00:00</div>
+
+  <!-- Quote Generator -->
+  <div class="text-center text-white text-md italic mt-2" id="quoteDisplay">Stay focused and never give up.
+    <p id="quoteDisplay" class="text-green-500 dark:text-yellow-400 font-semibold text-center text-lg mt-4"></p>
+
+  </div>
+  
+
+  <div class="flex flex-col lg:flex-row items-center justify-center gap-12 p-6">
+    <!-- Alarm Clock Container -->
+    <div class="bg-[#0f172a] dark:bg-[#1e293b] rounded-2xl shadow-lg text-[#10b981] text-center p-10 w-[340px] font-[Orbitron] tilt-on-hover">
+      <h1 class="text-3xl mb-4">Alarm Clock</h1>
+      <input type="time" id="alarmTime" class="w-full p-2 rounded-md text-gray-900 dark:text-white text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-green-400">
+      <div class="space-x-4">
+        <button onclick="setAlarm()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">Set Alarm</button>
+        <button onclick="stopAlarm()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">Stop Alarm</button>
+      </div>
+      <p id="status" class="mt-4 text-sm text-gray-300 dark:text-gray-400"></p>
+      
+    </div>
+
+    <!-- Song Selection + Custom Info Container -->
+    <div class="bg-[#0f172a] dark:bg-[#1e293b] rounded-xl shadow-lg p-8 w-full max-w-md text-[#10b981] tilt-on-hover">
+      <h2 class="text-xl font-bold mb-4">Customize Alarm</h2>
+      <label for="alarmSound" class="block mb-2 text-sm">Choose Alarm Sound</label>
+      <input type="file" id="alarmSoundFile" accept="audio/*" class="mb-4 w-full p-2 text-gray-900 dark:text-white rounded-md border border-gray-300">
+
+      <label for="alarmLabel" class="block mb-2 text-sm">Alarm Label</label>
+      <input type="text" id="alarmLabel" placeholder="e.g. Morning Yoga" class="mb-4 w-full p-2 text-gray-900 dark:text-white rounded-md border border-gray-300">
+
+      <label for="repeatDays" class="block mb-2 text-sm">Repeat Days</label>
+      <select id="repeatDays" multiple class="mb-4 w-full p-2 text-gray-900 dark:text-white bg-white dark:bg-[#1e293b] rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400">
+        <option class="bg-white dark:bg-[#1e293b] text-gray-900 dark:text-white">Monday</option>
+        <option class="bg-white dark:bg-[#1e293b] text-gray-900 dark:text-white">Tuesday</option>
+        <option class="bg-white dark:bg-[#1e293b] text-gray-900 dark:text-white">Wednesday</option>
+        <option class="bg-white dark:bg-[#1e293b] text-gray-900 dark:text-white">Thursday</option>
+        <option class="bg-white dark:bg-[#1e293b] text-gray-900 dark:text-white">Friday</option>
+        <option class="bg-white dark:bg-[#1e293b] text-gray-900 dark:text-white">Saturday</option>
+        <option class="bg-white dark:bg-[#1e293b] text-gray-900 dark:text-white">Sunday</option>
+      </select>
+      <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">* Alarm will ring only on selected days if specified.</p>
+    </div>
+  </div>
+
+  <!-- Alarm sound fallback -->
+  <audio id="alarmSound" preload="auto">
+    <source src="Alarm_sound.mp3" type="audio/mp3">
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    let alarmTime = null;
+    let alarmTriggered = false;
+
+    function setAlarm() {
+      const timeInput = document.getElementById("alarmTime").value;
+      if (!timeInput) {
+        alert("Please select a time!");
+        return;
+      }
+
+      const [hours, minutes] = timeInput.split(':');
+      let hour = parseInt(hours);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      hour = hour % 12 || 12;
+      const formattedTime = `${hour.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+
+      alarmTime = formattedTime;
+      alarmTriggered = false;
+
+      const label = document.getElementById("alarmLabel").value || "Alarm";
+      document.getElementById("status").innerText = `${label} set for ${alarmTime}`;
+    }
+
+    function stopAlarm() {
+      alarmTime = null;
+      alarmTriggered = false;
+      const audio = document.getElementById("alarmSound");
+      audio.pause();
+      audio.currentTime = 0;
+      document.getElementById("status").innerText = "Alarm stopped!";
+    }
+
+    setInterval(() => {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const hour12 = hours % 12 || 12;
+      const currentFormattedTime = `${hour12.toString().padStart(2, '0')}}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+
+      document.getElementById("liveClock").innerText = `${hour12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${ampm}`;
+
+      if (alarmTime === currentFormattedTime && !alarmTriggered) {
+        const fileInput = document.getElementById("alarmSoundFile");
+        const audio = document.getElementById("alarmSound");
+        if (fileInput && fileInput.files.length > 0) {
+          const customAudio = URL.createObjectURL(fileInput.files[0]);
+          audio.src = customAudio;
+        }
+        document.getElementById("status").innerText = "⏰ Time’s up!";
+        audio.play();
+
+        alarmTriggered = true;
+        document.getElementById("status").innerText = "Alarm triggered!";
+      }
+    }, 1000);
+
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    const quotes = [
+      "Rise and grind, legend.",
+      "You snooze, you lose.",
+      "Greatness begins before sunrise.",
+      "Sleep is for the strong — who wake up on time.",
+      "Dream it. Do it. Wake up for it."
+    ];
+
+    setInterval(() => {
+      const quoteDisplay = document.getElementById("quoteDisplay");
+      const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+      quoteDisplay.innerText = randomQuote;
+    }, 7000);
+  </script>
+</body>
+</html>

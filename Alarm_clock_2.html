@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alarm Clock</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .hover-tilt {
+      transition: transform 0.4s ease-in-out;
+      will-change: transform;
+      transform-style: preserve-3d;
+    }
+
+    .hover-tilt:hover {
+      transform: scale(1.01) rotateX(2deg) rotateY(-2deg);
+    }
+
+    .tilt-on-hover {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    .tilt-on-hover:hover {
+      transform: perspective(800px) rotateX(6deg) rotateY(-6deg) scale(1.02);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+<body class="hover-tilt font-sans bg-cover bg-center bg-no-repeat min-h-screen text-slate-900 transition-all duration-300 dark:bg-[#0f172a] dark:text-white" style="background-image: url('https://static.vecteezy.com/system/resources/previews/002/969/252/non_2x/abstract-colorful-background-free-vector.jpg');">
+
+  <!-- Navbar -->
+  <nav class="w-full bg-white/30 dark:bg-[#1e293b]/80 backdrop-blur-md py-4 px-6 flex justify-between items-center shadow-md">
+    <div class="font-[Orbitron] text-xl text-[#10b981]">AlarmMate</div>
+    <ul class="flex space-x-6 text-gray-800 dark:text-white">
+      <li class="hover:text-[#10b981] cursor-pointer">Home</li>
+      <li class="hover:text-[#10b981] cursor-pointer">Customize</li>
+      <li class="hover:text-[#10b981] cursor-pointer">About</li>
+      <li class="hover:text-[#10b981] cursor-pointer" onclick="toggleTheme()">Toggle Theme</li>
+    </ul>
+  </nav>
+
+  <div class="flex flex-col lg:flex-row items-center justify-center gap-12 p-6">
+    <!-- Alarm Clock Container -->
+    <div class="bg-[#0f172a] dark:bg-[#1e293b] rounded-2xl shadow-[0_10px_25px_rgba(0,0,0,0.4),inset_0_-5px_10px_rgba(255,255,255,0.05),inset_0_5px_10px_rgba(255,255,255,0.05)] text-[#10b981] text-center p-10 w-[340px] font-[Orbitron] tilt-on-hover">
+      <h1 class="text-3xl mb-4">Alarm Clock</h1>
+      <input type="time" id="alarmTime" class="w-full p-2 rounded-md text-black text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-green-400">
+      <div class="space-x-4">
+        <button onclick="setAlarm()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">Set Alarm</button>
+        <button onclick="stopAlarm()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">Stop Alarm</button>
+      </div>
+      <p id="status" class="mt-4 text-sm text-gray-300"></p>
+    </div>
+
+    <!-- Song Selection + Custom Info Container -->
+    <div class="bg-[#0f172a] dark:bg-[#1e293b] hover:scale-105 hover:-rotate-1 hover:shadow-[0_20px_40px_rgba(16,185,129,0.4)] transition-all duration-300 ease-in-out p-8 rounded-xl shadow-lg w-full max-w-md text-center">
+      <h2 class="text-xl font-bold mb-4 text-white">Customize Alarm</h2>
+      <label for="alarmSound" class="block mb-2 text-sm text-gray-300">Choose Alarm Sound</label>
+      <input type="file" id="alarmSoundFile" accept="audio/*" class="mb-4 w-full p-2 text-sm text-black rounded-md border border-gray-300">
+
+      <label for="alarmLabel" class="block mb-2 text-sm text-gray-300">Alarm Label</label>
+      <input type="text" id="alarmLabel" placeholder="e.g. Morning Yoga" class="mb-4 w-full p-2 rounded-md border border-gray-300">
+
+      <label for="repeatDays" class="block mb-2 text-sm text-gray-300">Repeat Days</label>
+      <select id="repeatDays" multiple class="mb-4 w-full p-2 rounded-md border border-gray-300">
+        <option>Monday</option>
+        <option>Tuesday</option>
+        <option>Wednesday</option>
+        <option>Thursday</option>
+        <option>Friday</option>
+        <option>Saturday</option>
+        <option>Sunday</option>
+      </select>
+      <p class="text-xs text-gray-400 mt-2">* Alarm will ring only on selected days if specified.</p>
+    </div>
+  </div>
+
+  <!-- Alarm sound fallback -->
+  <audio id="alarmSound" preload="auto">
+    <source src="Alarm_sound.mp3" type="audio/mp3">
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    let alarmTime = null;
+    let alarmTriggered = false;
+
+    function setAlarm() {
+      const timeInput = document.getElementById("alarmTime").value;
+      if (!timeInput) {
+        alert("Please select a time!");
+        return;
+      }
+
+      const [hours, minutes] = timeInput.split(':');
+      let hour = parseInt(hours);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      hour = hour % 12 || 12;
+      const formattedTime = `${hour.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+
+      alarmTime = formattedTime;
+      alarmTriggered = false;
+
+      const label = document.getElementById("alarmLabel").value || "Alarm";
+      document.getElementById("status").innerText = `${label} set for ${alarmTime}`;
+    }
+
+    function stopAlarm() {
+      alarmTime = null;
+      alarmTriggered = false;
+      const audio = document.getElementById("alarmSound");
+      audio.pause();
+      audio.currentTime = 0;
+      document.getElementById("status").innerText = "Alarm stopped!";
+    }
+
+    setInterval(() => {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const hour12 = hours % 12 || 12;
+      const currentFormattedTime = `${hour12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+
+      if (alarmTime === currentFormattedTime && !alarmTriggered) {
+        const fileInput = document.getElementById("alarmSoundFile");
+        const audio = document.getElementById("alarmSound");
+        if (fileInput && fileInput.files.length > 0) {
+          const customAudio = URL.createObjectURL(fileInput.files[0]);
+          audio.src = customAudio;
+        }
+        document.getElementById("status").innerText = "\u23F0 Time’s up!";
+        audio.play();
+
+        alarmTriggered = true;
+        document.getElementById("status").innerText = "Alarm triggered!";
+      }
+    }, 1000);
+
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
+  </script>
+</body>
+</html>
